@@ -1,0 +1,33 @@
+#+TITLE: Notes
+
+* Worked example
+
+s = "12"
+
+Base cases:
+    numDecodings(0) = 0
+    numDecodings(0.*) = 0
+    numDecodings(1-9) = 1
+
+General Cases:
+    numDecodings(10-26) = at least 1
+        numDecodings(10) = 1
+        numDecodings(11) = 2 = "1" and "11"
+
+
+"226"
+
+  numDecodings(226) = numDecodings(26) + numDecodings(6)
+   numDecodings(26) = numDecodings(6) + numDecodings()
+    numDecodings(6) = numDecodings()
+
+
+
+ "2" + "26"
+ "2" + "2" + "6"
+
+ "22" + "6"
+
+ "206"
+ "2" + "06" INVALID
+ "20" + "6"

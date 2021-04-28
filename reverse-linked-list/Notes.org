@@ -1,0 +1,84 @@
+#+TITLE: Notes
+
+* Solution plan:
+** Stack Solution
+LIFO for stack
+
+1, 2, 3
+
+3
+2
+1
+
+3 2 1
+
+*** Steps
+**** Create a stack
+**** Iterate over the linkedlist, pushing onto the stack and removing their next pointers
+**** While the stack is not empty, add to the linked list
+
+
+
+** Recursive Solution
+The general idea is to remove the first node and attach it to the end of the reversed list
+
+recurse(Node1 -> Node2 -> Node3 -> None)
+Node1 ->  recurse(Node2 -> Node3 -> None)
+
+Rotate the pointer:
+Node1 <- recurse(Node2 -> Node3 -> None)
+      ->
+Remove old pointer:
+Node2 <- Node2 <- recurse(Node3 -> None)
+Node2 <- Node2 <- recurse(Node3 -> None)
+
+** Iterative Solution
+Node1 -> Node2 -> Node3 -> None
+*** 3 pointers:
+Previous is used as the destination to replace next
+    This starts by pointing to None
+Current is the node which is having its pointer flipped
+    This starts by pointing at head
+Next is a handle onto what used to be next
+    This starts by pointing to the Current.next
+
+**** Start at the begining of the list:
+Previous  Current  Next
+    V        V       V
+  None    Node1 -> Node2 -> Node3 -> None
+
+**** Perform the pointer rotation:
+Previous  Current  Next
+    V        V       V
+  None  <-  Node1   Node2 -> Node3 -> None
+
+**** Update the pointers to move forward in the list
+         Previous  Current  Next
+            V        V       V
+ None  <-  Node1   Node2 -> Node3 -> None
+
+*** Egde/Test cases to consider
+**** Empty list
+Previous -> None
+Current -> None
+**** 1 Value
+Previous -> None
+Current -> 1
+Next -> None
+**** 2 Values
+Previous  Current  Next
+    V        V       V
+  None    Node1 -> Node2 -> None
+
+Previous  Current  Next
+    V        V       V
+  None <- Node1   Node2 -> None
+
+         Previous  Current  Next
+            V       V        V
+  None <- Node1   Node2 -> None
+
+         Previous  Current  Next
+            V       V        V
+  None <- Node1 <- Node2    None
+**** n Values
