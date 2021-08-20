@@ -1,6 +1,9 @@
-from collections import namedtuple
-
-CachedItem = namedtuple('cachedItem', ['value', 'key', 'previousItem', 'nextItem'])
+class CachedItem(object):
+    def __init__(self, key, value, prev, nxt):
+        self.key = key
+        self.value = value
+        self.previousItem = prev
+        self.nextItem = nxt
 
 class LRUCache(object):
     def __init__(self, capacity):
@@ -12,23 +15,58 @@ class LRUCache(object):
         # Contains cachedItems
         self.cache = {}
 
-        # The key of the most recently used item
-        self.head_key = None
+        # Head and tail pointers
+        # Head is always most recently used item
+        self.head = None
+        self.tail = None
 
-        # The key of the least recently used item
-        self.tail_key = None
+    def add_to_front_of_list(self, cachedItem):
+        # cachedItem is now in front with no previous
+        cachedItem.previousItem = None
+        cachedItem.nextItem = self.head
 
+        if self.head == None:
+            # Add new cachedItem to front of queue
+            self.head = cachedItem
+            self.tail = cachedItem
+        else:
+            self.head.previousItem = cachedItem
+            self.head = cachedItem
+
+    def remove_from_list(self, cachedItem):
+        # Head node
+        if self.head == cachedItem:
+            self.head = cachedItem.nextItem
+
+        # Tail node
+        if self.tail == cachedItem:
+            self.tail = cachedItem.previousItem
+
+        # Middle node
+        if cachedItem.previousItem != None:
+            cachedItem.previousItem.nextItem = cachedItem.nextItem
+
+        if cachedItem.nextItem != None:
+            cachedItem.nextItem.previousItem = cachedItem.previousItem
+
+        return cachedItem
 
     def evict(self):
+        """
+        Performs eviction on LRU items
+        """
         # Check if capacity has been reached
         if len(self.cache) > self.capacity:
             # Remove last cache item
-            tailNode = self.cache[self.tail_key]
+            lastItem = self.tail
+            self.remove_from_list(lastItem)
 
-            self.tail_key = tailNode.previous.key
-            self.cache[self.tail_key].next = None
+            self.cache.pop(lastItem.key)
 
-            self.cache.pop(tailNode.key)
+    def move_to_front_of_queue(self, cachedItem):
+        # Update the items position in the queue
+        self.remove_from_list(cachedItem)
+        self.add_to_front_of_list(cachedItem)
 
 
     def get(self, key):
@@ -37,19 +75,12 @@ class LRUCache(object):
         :rtype: int
         """
         if key in self.cache:
+            cachedItem = self.cache[key]
+            self.move_to_front_of_queue(cachedItem)
 
-            # The entry already exsists
-            newHeadNode = self.cache[key]
-
-            # Get the head node
-            headNode = self.cache[self.head_key]
-            headNode.next = newHeadNode
-            newHeadNode.previous = headNode
-
-            return self.cache[key].value
+            return cachedItem.value
         else:
             return -1
-
 
     def put(self, key, value):
         """
@@ -58,25 +89,22 @@ class LRUCache(object):
         :rtype: None
         """
 
-        # Add new element
-        newHeadNode = None
         if key in self.cache:
-            # The entry already exsists
-            newHeadNode = self.cache[key]
+            # The entry already exsists, so update
+            cachedItem = self.cache[key]
+            cachedItem.value = value
+
+            # Update the items position in the queue
+            self.move_to_front_of_queue(cachedItem)
+
         else:
-            newHeadNode = CachedItem(value, key, None, None)
-            self.cache[key] = newHeadNode
+            cachedItem = CachedItem(value, key, None, None)
+            self.cache[key] = cachedItem
 
-        # Get the head node
-        if self.head_key:
-            headNode = self.cache[self.head_key]
-            headNode.next = newHeadNode
-            newHeadNode.previous = headNode
-            self.head_key = newHeadNode.key
+            # Add the item to the queue
+            self.add_to_front_of_list(cachedItem)
 
-        # Evict if required
         self.evict()
-
 
 # Your LRUCache object will be instantiated and called as such:
 # obj = LRUCache(capacity)
